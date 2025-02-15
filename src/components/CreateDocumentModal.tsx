@@ -12,17 +12,16 @@ export const CreateDocumentModal: React.FC<Props> = ({ onClose, onCreate }) => {
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file && file.type === 'application/pdf') {
-      setPdfFile(file);
       const url = URL.createObjectURL(file);
       setPdfUrl(url);
     } else {
-      alert('Please upload a valid PDF file!');
+      alert('❌ Please upload a valid PDF file!');
     }
   };
 
   const handleCreateDocument = () => {
     if (!pdfFile || !pdfUrl) {
-      alert('Please select a PDF file!');
+      alert('⚠️ Select a PDF file first!');
       return;
     }
 
@@ -32,6 +31,7 @@ export const CreateDocumentModal: React.FC<Props> = ({ onClose, onCreate }) => {
       pdfUrl: pdfUrl,
       ratings: Array(10).fill(0),
     };
+
     onCreate(doc);
   };
 
@@ -47,6 +47,7 @@ export const CreateDocumentModal: React.FC<Props> = ({ onClose, onCreate }) => {
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'center',
+        zIndex: 10,
       }}
     >
       <div
@@ -54,10 +55,13 @@ export const CreateDocumentModal: React.FC<Props> = ({ onClose, onCreate }) => {
           backgroundColor: 'white',
           padding: '20px',
           borderRadius: '10px',
+          boxShadow: '0 5px 15px rgba(0,0,0,0.3)',
           width: '400px',
+          textAlign: 'center',
         }}
       >
-        <h3>📎 Upload PDF</h3>
+        <h3>📎 Upload PDF Document</h3>
+
         <input
           type="file"
           accept="application/pdf"
@@ -67,27 +71,28 @@ export const CreateDocumentModal: React.FC<Props> = ({ onClose, onCreate }) => {
 
         {pdfUrl && (
           <div style={{ margin: '20px 0' }}>
-            <h4>PDF Preview:</h4>
+            <h4>🔍 PDF Preview:</h4>
             <object data={pdfUrl} type="application/pdf" width="100%" height="300px">
-              <p>PDF preview not available.</p>
+              <p>⚠️ PDF preview not available.</p>
             </object>
           </div>
         )}
 
-        <div style={{ marginTop: '20px', display: 'flex', gap: '10px' }}>
+        <div style={{ marginTop: '20px', display: 'flex', justifyContent: 'center', gap: '10px' }}>
           <button
             onClick={handleCreateDocument}
             style={{
               padding: '10px 20px',
-              backgroundColor: '#28a745',
+              backgroundColor: pdfFile ? '#28a745' : '#ccc',
               color: 'white',
               border: 'none',
               borderRadius: '5px',
-              cursor: 'pointer',
+              cursor: pdfFile ? 'pointer' : 'not-allowed',
             }}
           >
-            Create
+            ➕ Create Document
           </button>
+
           <button
             onClick={onClose}
             style={{
@@ -99,7 +104,7 @@ export const CreateDocumentModal: React.FC<Props> = ({ onClose, onCreate }) => {
               cursor: 'pointer',
             }}
           >
-            Cancel
+            ❌ Cancel
           </button>
         </div>
       </div>

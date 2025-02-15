@@ -13,7 +13,7 @@ type Document = {
   ratings: number[];
 };
 
-export const App = () => {
+export const App = ({ initialDocUrl }: { initialDocUrl: string | null }) => {
   const [repo, setRepo] = useState<Repo | null>(null);
   const [documents, setDocuments] = useState<Document[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -26,18 +26,20 @@ export const App = () => {
     });
     setRepo(newRepo);
 
-    // Retrieve existing documents from the repo
+    // Load existing documents from the repo
     const loadDocuments = async () => {
-      const handles = newRepo.handles();
+      const handles = Object.values(newRepo.handles);
       const docs: Document[] = [];
       for (const handle of handles) {
-        const doc = await handle.value();
-        docs.push({
-          id: handle.url,
-          pdfName: doc.pdfName,
-          pdfUrl: doc.pdfUrl,
-          ratings: doc.ratings,
-        });
+        const doc = await handle.doc();
+        if (doc) {
+          docs.push({
+            id: handle.url,
+            pdfName: doc.pdfName,
+            pdfUrl: doc.pdfUrl,
+            ratings: doc.ratings,
+          });
+        }
       }
       setDocuments(docs);
     };
@@ -49,11 +51,12 @@ export const App = () => {
   const handleOpenModal = () => setIsModalOpen(true);
   const handleCloseModal = () => setIsModalOpen(false);
 
-  // Add new document to the repo and list
+  // Add new document
   const addDocument = async (doc: Document) => {
     if (!repo) return;
 
     const handle = repo.create<Document>({
+      id: `automerge:${Math.random().toString(36).substr(2, 9)}`,
       pdfName: doc.pdfName,
       pdfUrl: doc.pdfUrl,
       ratings: doc.ratings,
@@ -62,6 +65,11 @@ export const App = () => {
     setDocuments((prev) => [...prev, { ...doc, id: handle.url }]);
     handleCloseModal();
   };
+
+  if (initialDocUrl) {
+    window.location.href = `/#${initialDocUrl}`;
+    return null;
+  }
 
   return (
     <RepoContext.Provider value={repo}>
