@@ -5,7 +5,7 @@ import { RepoContext } from '@automerge/automerge-repo-react-hooks';
 
 type Document = {
   pdfName: string;
-  pdfData?: string; // Base64-encoded PDF
+  pdfUrl?: string;
   ratings: number[];
 };
 
@@ -14,7 +14,6 @@ export const App = () => {
   const [docUrl, setDocUrl] = useState<string | null>(null);
   const [documents, setDocuments] = useState<string[]>([]);
   const [pdfUrl, setPdfUrl] = useState<string | null>(null);
-  const [pdfFile, setPdfFile] = useState<File | null>(null);
 
   // Initialize Automerge Repo
   useEffect(() => {
@@ -28,34 +27,26 @@ export const App = () => {
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file && file.type === 'application/pdf') {
-      setPdfFile(file);
       const url = URL.createObjectURL(file);
       setPdfUrl(url);
     } else {
-      alert('Please upload a valid PDF file!');
+      alert('Please upload a valid PDF file!");
     }
   };
 
-  // Create a new document with the uploaded PDF
-  const createDocument = async () => {
-    if (!repo || !pdfFile) {
-      alert('Please select a PDF file first!');
+  const createDocument = () => {
+    if (!repo || !pdfUrl) {
+      alert('Please upload a PDF first!');
       return;
     }
 
-    // Convert PDF file to Base64
-    const reader = new FileReader();
-    reader.onload = () => {
-      const pdfBase64 = reader.result as string;
-      const handle = repo.create<Document>({
-        pdfName: pdfFile.name,
-        pdfData: pdfBase64,
-        ratings: Array(10).fill(0),
-      });
-      setDocUrl(handle.url);
-      setDocuments((prev) => [...prev, handle.url]);
-    };
-    reader.readAsDataURL(pdfFile);
+    const handle = repo.create<Document>({
+      pdfName: 'Uploaded PDF',
+      pdfUrl: pdfUrl,
+      ratings: Array(10).fill(0),
+    });
+    setDocUrl(handle.url);
+    setDocuments((prev) => [...prev, handle.url]);
   };
 
   return (
@@ -98,11 +89,11 @@ export const App = () => {
             style={{
               marginTop: '20px',
               padding: '10px 20px',
-              backgroundColor: pdfFile ? '#007BFF' : '#ccc',
+              backgroundColor: pdfUrl ? '#007BFF' : '#ccc',
               color: 'white',
               border: 'none',
               borderRadius: '5px',
-              cursor: pdfFile ? 'pointer' : 'not-allowed',
+              cursor: pdfUrl ? 'pointer' : 'not-allowed',
             }}
           >
             ➕ Create Document with PDF
