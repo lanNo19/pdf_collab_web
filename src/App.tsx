@@ -5,6 +5,7 @@ import { IndexedDBStorageAdapter } from '@automerge/automerge-repo-storage-index
 import { RepoContext } from '@automerge/automerge-repo-react-hooks';
 import { DocumentList } from './components/DocumentList';
 import { CreateDocumentModal } from './components/CreateDocumentModal';
+import { DocumentView } from './views/DocumentView';
 
 type Document = {
   id: string;
@@ -65,8 +66,8 @@ export const App = ({ initialDocUrl }: { initialDocUrl: string | null }) => {
       id: `automerge:${Math.random().toString(36).substr(2, 9)}`,
       pdfName: doc.pdfName,
       pdfUrl: doc.pdfUrl,
-      ratings: doc.ratings,
-    });
+      ratings: Array(10).fill(0),
+    });    
 
     setDocuments((prev) => [...prev, { ...doc, id: handle.url }]);
     handleCloseModal();

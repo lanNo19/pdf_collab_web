@@ -28,8 +28,5 @@ ReactDOM.createRoot(root).render(
   );
 };
 
-// Re-render the app whenever the URL hash changes
-window.addEventListener('hashchange', renderApp);
-
 // Initial render
 renderApp();
