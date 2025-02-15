@@ -30,7 +30,7 @@ export const App = () => {
       const url = URL.createObjectURL(file);
       setPdfUrl(url);
     } else {
-      alert('Please upload a valid PDF file!");
+      alert('Please upload a valid PDF file!');
     }
   };
 
