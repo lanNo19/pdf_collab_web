@@ -2,31 +2,16 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { App } from './App';
 import './index.css';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { DocumentView } from './views/DocumentView';
 
-// We'll handle document-specific routing based on URL hash
-const renderApp = () => {
-  const root = document.getElementById('root') as HTMLElement;
-  const hash = window.location.hash.slice(1);
-
-// Debug URL parsing
-console.log('🔍 Current URL hash:', hash);
-
-// Only pass valid Automerge URLs
-const isValidUrl = hash.startsWith('automerge:');
-
-ReactDOM.createRoot(root).render(
+ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
-    <App initialDocUrl={isValidUrl ? hash : null} />
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<App initialDocUrl={null} />} />
+        <Route path="/document/:docId" element={<DocumentView docUrl={window.location.hash.slice(1)} />} />
+      </Routes>
+    </BrowserRouter>
   </React.StrictMode>
 );
-
-
-  ReactDOM.createRoot(root).render(
-    <React.StrictMode>
-      <App initialDocUrl={hash || null} />
-    </React.StrictMode>
-  );
-};
-
-// Initial render
-renderApp();

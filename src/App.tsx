@@ -62,12 +62,14 @@ export const App = ({ initialDocUrl }: { initialDocUrl: string | null }) => {
   const addDocument = async (doc: Document) => {
     if (!repo) return;
 
-    const handle = repo.create<Document>({
-      id: `automerge:${Math.random().toString(36).substr(2, 9)}`,
-      pdfName: doc.pdfName,
-      pdfUrl: doc.pdfUrl,
-      ratings: Array(10).fill(0),
-    });    
+    const handle = repo.create<Document>();
+    handle.change((draft) => {
+      draft.id = `automerge:${Math.random().toString(36).substr(2, 9)}`;
+      draft.pdfName = doc.pdfName;
+      draft.pdfUrl = doc.pdfUrl;
+      draft.ratings = Array(10).fill(0);
+    });
+    
 
     setDocuments((prev) => [...prev, { ...doc, id: handle.url }]);
     handleCloseModal();

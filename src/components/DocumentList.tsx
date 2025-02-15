@@ -18,17 +18,18 @@ export const DocumentList: React.FC<Props> = ({ documents }) => {
         <p>No documents available. Create one to get started!</p>
       ) : (
         <ul>
-          {documents.map((doc) => (
-            <li key={doc.id}>
-              <a
-                href={`#${doc.id}`}
-                style={{ textDecoration: 'none', color: '#007BFF' }}
-              >
+        {documents.map((doc) => (
+            <li key={doc.id} style={{ margin: '10px 0' }}>
+                <a
+                href={`/document/${doc.id}`}
+                style={{ textDecoration: 'underline', color: '#007BFF', cursor: 'pointer' }}
+                >
                 📄 {doc.pdfName}
-              </a>
+                </a>
             </li>
-          ))}
+        ))}
         </ul>
+
       )}
     </div>
   );
