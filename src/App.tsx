@@ -1,9 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { Repo } from '@automerge/automerge-repo';
 import { BroadcastChannelNetworkAdapter } from '@automerge/automerge-repo-network-broadcastchannel';
+import { IndexedDBStorageAdapter } from '@automerge/automerge-repo-storage-indexeddb';
 import { RepoContext } from '@automerge/automerge-repo-react-hooks';
+import { DocumentList } from './components/DocumentList';
+import { CreateDocumentModal } from './components/CreateDocumentModal';
 
 type Document = {
+  id: string;
   pdfName: string;
   pdfUrl?: string;
   ratings: number[];
@@ -11,42 +15,52 @@ type Document = {
 
 export const App = () => {
   const [repo, setRepo] = useState<Repo | null>(null);
-  const [docUrl, setDocUrl] = useState<string | null>(null);
-  const [documents, setDocuments] = useState<string[]>([]);
-  const [pdfUrl, setPdfUrl] = useState<string | null>(null);
+  const [documents, setDocuments] = useState<Document[]>([]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   // Initialize Automerge Repo
   useEffect(() => {
     const newRepo = new Repo({
       network: [new BroadcastChannelNetworkAdapter()],
+      storage: new IndexedDBStorageAdapter(),
     });
     setRepo(newRepo);
+
+    // Retrieve existing documents from the repo
+    const loadDocuments = async () => {
+      const handles = newRepo.handles();
+      const docs: Document[] = [];
+      for (const handle of handles) {
+        const doc = await handle.value();
+        docs.push({
+          id: handle.url,
+          pdfName: doc.pdfName,
+          pdfUrl: doc.pdfUrl,
+          ratings: doc.ratings,
+        });
+      }
+      setDocuments(docs);
+    };
+
+    loadDocuments();
   }, []);
 
-  // Handle PDF file selection
-  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file && file.type === 'application/pdf') {
-      const url = URL.createObjectURL(file);
-      setPdfUrl(url);
-    } else {
-      alert('Please upload a valid PDF file!');
-    }
-  };
+  // Open modal for document creation
+  const handleOpenModal = () => setIsModalOpen(true);
+  const handleCloseModal = () => setIsModalOpen(false);
 
-  const createDocument = () => {
-    if (!repo || !pdfUrl) {
-      alert('Please upload a PDF first!');
-      return;
-    }
+  // Add new document to the repo and list
+  const addDocument = async (doc: Document) => {
+    if (!repo) return;
 
     const handle = repo.create<Document>({
-      pdfName: 'Uploaded PDF',
-      pdfUrl: pdfUrl,
-      ratings: Array(10).fill(0),
+      pdfName: doc.pdfName,
+      pdfUrl: doc.pdfUrl,
+      ratings: doc.ratings,
     });
-    setDocUrl(handle.url);
-    setDocuments((prev) => [...prev, handle.url]);
+
+    setDocuments((prev) => [...prev, { ...doc, id: handle.url }]);
+    handleCloseModal();
   };
 
   return (
@@ -55,74 +69,26 @@ export const App = () => {
         <h1>📄 PDF Collaboration App</h1>
 
         {/* Document List */}
-        <div>
-          <h2>Your Documents</h2>
-          <ul>
-            {documents.map((url, index) => (
-              <li key={index}>
-                <a href={`#${url}`} target="_blank" rel="noopener noreferrer">
-                  {url}
-                </a>
-              </li>
-            ))}
-          </ul>
-        </div>
+        <DocumentList documents={documents} />
 
-        {/* PDF Upload */}
-        <div style={{ marginTop: '20px' }}>
-          <input
-            type="file"
-            accept="application/pdf"
-            onChange={handleFileUpload}
-            style={{ marginBottom: '10px' }}
-          />
-          {pdfUrl && (
-            <div style={{ margin: '20px 0' }}>
-              <h3>PDF Preview:</h3>
-              <object data={pdfUrl} type="application/pdf" width="100%" height="500px">
-                <p>PDF preview not available. Please check the file.</p>
-              </object>
-            </div>
-          )}
-          <button
-            onClick={createDocument}
-            style={{
-              marginTop: '20px',
-              padding: '10px 20px',
-              backgroundColor: pdfUrl ? '#007BFF' : '#ccc',
-              color: 'white',
-              border: 'none',
-              borderRadius: '5px',
-              cursor: pdfUrl ? 'pointer' : 'not-allowed',
-            }}
-          >
-            ➕ Create Document with PDF
-          </button>
-        </div>
+        {/* Create New Document Button */}
+        <button
+          onClick={handleOpenModal}
+          style={{
+            marginTop: '20px',
+            padding: '10px 20px',
+            backgroundColor: '#007BFF',
+            color: 'white',
+            border: 'none',
+            borderRadius: '5px',
+            cursor: 'pointer',
+          }}
+        >
+          ➕ Create New Document
+        </button>
 
-        {/* Shareable Link */}
-        {docUrl && (
-          <div style={{ marginTop: '20px' }}>
-            <button
-              onClick={() => {
-                const link = `${window.location.origin}/#${docUrl}`;
-                navigator.clipboard.writeText(link);
-                alert(`Link copied: ${link}`);
-              }}
-              style={{
-                padding: '10px 20px',
-                backgroundColor: '#4CAF50',
-                color: 'white',
-                border: 'none',
-                borderRadius: '5px',
-                marginTop: '10px',
-                cursor: 'pointer',
-              }}
-            >
-              📎 Copy Shareable Link
-            </button>
-          </div>
-        )}
+        {/* Create Document Modal */}
+        {isModalOpen && <CreateDocumentModal onClose={handleCloseModal} onCreate={addDocument} />}
       </div>
     </RepoContext.Provider>
   );
