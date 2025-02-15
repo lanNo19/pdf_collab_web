@@ -25,13 +25,17 @@ export const App = ({ initialDocUrl }: { initialDocUrl: string | null }) => {
       storage: new IndexedDBStorageAdapter(),
     });
     setRepo(newRepo);
-
-    // Load existing documents from the repo
+  
+    // Debugging Automerge initialization
+    console.log('🛠️ Automerge repo initialized:', newRepo);
+  
     const loadDocuments = async () => {
       const handles = Object.values(newRepo.handles);
+      console.log('🔍 Automerge document handles:', handles);
       const docs: Document[] = [];
       for (const handle of handles) {
         const doc = await handle.doc();
+        console.log(`📄 Document from handle (${handle.url}):`, doc);
         if (doc) {
           docs.push({
             id: handle.url,
@@ -41,11 +45,13 @@ export const App = ({ initialDocUrl }: { initialDocUrl: string | null }) => {
           });
         }
       }
+      console.log('📋 Loaded documents:', docs);
       setDocuments(docs);
     };
-
+  
     loadDocuments();
   }, []);
+  
 
   // Open modal for document creation
   const handleOpenModal = () => setIsModalOpen(true);

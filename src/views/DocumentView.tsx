@@ -17,11 +17,16 @@ export const DocumentView = ({ docUrl }: { docUrl: string }) => {
   const [isOwner, setIsOwner] = useState<boolean>(false);
 
   useEffect(() => {
+    console.log(`🔍 Attempting to load document for URL: ${docUrl}`);
     if (doc) {
-      // Simulate ownership check
-      setIsOwner(Math.random() > 0.5);
+      console.log('✅ Document successfully loaded:', doc);
+      console.log('🔗 PDF URL:', doc.pdfUrl);
+      setIsOwner(Math.random() > 0.5); // Temporary ownership check
+    } else {
+      console.warn('⚠️ Document not found for URL:', docUrl);
     }
   }, [doc]);
+  
 
   const handleRate = (index: number, score: number) => {
     changeDoc((draft) => {
