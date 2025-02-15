@@ -2,9 +2,12 @@ import React, { useEffect, useState } from 'react';
 import { Repo } from '@automerge/automerge-repo';
 import { BroadcastChannelNetworkAdapter } from '@automerge/automerge-repo-network-broadcastchannel';
 import { RepoContext } from '@automerge/automerge-repo-react-hooks';
+import { Viewer } from '@react-pdf-viewer/core';
+import '@react-pdf-viewer/core/lib/styles/index.css';
 
 type Document = {
   pdfName: string;
+  pdfData?: string; // Base64 string of the PDF
   ratings: number[];
 };
 
@@ -12,6 +15,8 @@ export const App = () => {
   const [repo, setRepo] = useState<Repo | null>(null);
   const [docUrl, setDocUrl] = useState<string | null>(null);
   const [documents, setDocuments] = useState<string[]>([]);
+  const [pdfFile, setPdfFile] = useState<File | null>(null);
+  const [pdfUrl, setPdfUrl] = useState<string | null>(null);
 
   useEffect(() => {
     const newRepo = new Repo({
@@ -20,14 +25,36 @@ export const App = () => {
     setRepo(newRepo);
   }, []);
 
-  const createDocument = () => {
-    if (!repo) return;
-    const handle = repo.create<Document>({
-      pdfName: 'New PDF Document',
-      ratings: Array(10).fill(0),
-    });
-    setDocUrl(handle.url);
-    setDocuments((prev) => [...prev, handle.url]);
+  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file && file.type === 'application/pdf') {
+      setPdfFile(file);
+      const url = URL.createObjectURL(file);
+      setPdfUrl(url);
+    } else {
+      alert('Please upload a valid PDF file!');
+    }
+  };
+
+  const createDocument = async () => {
+    if (!repo || !pdfFile) {
+      alert('Please select a PDF file first!');
+      return;
+    }
+
+    // Convert PDF to Base64
+    const reader = new FileReader();
+    reader.readAsDataURL(pdfFile);
+    reader.onload = () => {
+      const pdfBase64 = reader.result as string;
+      const handle = repo.create<Document>({
+        pdfName: pdfFile.name,
+        pdfData: pdfBase64,
+        ratings: Array(10).fill(0),
+      });
+      setDocUrl(handle.url);
+      setDocuments((prev) => [...prev, handle.url]);
+    };
   };
 
   return (
@@ -49,21 +76,37 @@ export const App = () => {
           </ul>
         </div>
 
-        {/* Create Document Button */}
-        <button
-          onClick={createDocument}
-          style={{
-            marginTop: '20px',
-            padding: '10px 20px',
-            backgroundColor: '#007BFF',
-            color: 'white',
-            border: 'none',
-            borderRadius: '5px',
-            cursor: 'pointer',
-          }}
-        >
-          ➕ Create New Document
-        </button>
+        {/* PDF Upload */}
+        <div style={{ marginTop: '20px' }}>
+          <input
+            type="file"
+            accept="application/pdf"
+            onChange={handleFileUpload}
+            style={{ marginBottom: '10px' }}
+          />
+          {pdfUrl && (
+            <div style={{ margin: '20px 0' }}>
+              <h3>Preview:</h3>
+              <div style={{ height: '400px', border: '1px solid #000' }}>
+                <Viewer fileUrl={pdfUrl} />
+              </div>
+            </div>
+          )}
+          <button
+            onClick={createDocument}
+            style={{
+              marginTop: '20px',
+              padding: '10px 20px',
+              backgroundColor: pdfFile ? '#007BFF' : '#ccc',
+              color: 'white',
+              border: 'none',
+              borderRadius: '5px',
+              cursor: pdfFile ? 'pointer' : 'not-allowed',
+            }}
+          >
+            ➕ Create Document with PDF
+          </button>
+        </div>
 
         {/* Shareable Link */}
         {docUrl && (
@@ -80,8 +123,8 @@ export const App = () => {
                 color: 'white',
                 border: 'none',
                 borderRadius: '5px',
-                cursor: 'pointer',
                 marginTop: '10px',
+                cursor: 'pointer',
               }}
             >
               📎 Copy Shareable Link
