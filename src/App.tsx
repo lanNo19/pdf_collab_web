@@ -1,82 +1,94 @@
-import automergeLogo from '/automerge.png'
-import '@picocss/pico/css/pico.min.css'
-import './App.css'
-import { useDocument } from '@automerge/automerge-repo-react-hooks'
-import { updateText } from '@automerge/automerge/next'
-import type { AutomergeUrl } from '@automerge/automerge-repo'
+import React, { useEffect, useState } from 'react';
+import { Repo } from '@automerge/automerge-repo';
+import { BroadcastChannelNetworkAdapter } from '@automerge/automerge-repo-network-broadcastchannel';
+import { RepoContext } from '@automerge/automerge-repo-react-hooks';
 
+type Document = {
+  pdfName: string;
+  ratings: number[];
+};
 
-export interface Task {
-  title: string;
-  done: boolean;
-}
+export const App = () => {
+  const [repo, setRepo] = useState<Repo | null>(null);
+  const [docUrl, setDocUrl] = useState<string | null>(null);
+  const [documents, setDocuments] = useState<string[]>([]);
 
-export interface TaskList {
-  tasks: Task[];
-}
+  useEffect(() => {
+    const newRepo = new Repo({
+      network: [new BroadcastChannelNetworkAdapter()],
+    });
+    setRepo(newRepo);
+  }, []);
 
-
-function App({ docUrl }: { docUrl: AutomergeUrl }) {
-
-  const [doc, changeDoc] = useDocument<TaskList>(docUrl)
+  const createDocument = () => {
+    if (!repo) return;
+    const handle = repo.create<Document>({
+      pdfName: 'New PDF Document',
+      ratings: Array(10).fill(0),
+    });
+    setDocUrl(handle.url);
+    setDocuments((prev) => [...prev, handle.url]);
+  };
 
   return (
-    <>
-      <header>
-          <a href="https://automerge.org" target="_blank">
-            <img src={automergeLogo} className="logo" alt="Automerge logo" />
-          </a>
-        <h1>
-          Automerge Task List
-        </h1>
-      </header>
+    <RepoContext.Provider value={repo}>
+      <div className="app" style={{ padding: '20px' }}>
+        <h1>📄 PDF Collaboration App</h1>
 
+        {/* Document List */}
+        <div>
+          <h2>Your Documents</h2>
+          <ul>
+            {documents.map((url, index) => (
+              <li key={index}>
+                <a href={`#${url}`} target="_blank" rel="noopener noreferrer">
+                  {url}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </div>
 
-      <button type="button" onClick={() => {
-        changeDoc(d =>
-          d.tasks.unshift({
-            title: '',
-            done: false
-          })
-        );
-      }}>
-        <b>+</b> New task
-      </button>
+        {/* Create Document Button */}
+        <button
+          onClick={createDocument}
+          style={{
+            marginTop: '20px',
+            padding: '10px 20px',
+            backgroundColor: '#007BFF',
+            color: 'white',
+            border: 'none',
+            borderRadius: '5px',
+            cursor: 'pointer',
+          }}
+        >
+          ➕ Create New Document
+        </button>
 
-      <div id='task-list'>
-
-      {doc && doc.tasks?.map(({ title, done }, index) =>
-        <div className='task' key={index}>
-          <input
-            type="checkbox"
-            checked={done}
-            onChange={() => changeDoc(d => {
-              d.tasks[index].done = !d.tasks[index].done;
-            })}
-          />
-
-          <input type="text"
-            placeholder='What needs doing?' value={title || ''}
-            onChange={(e) => changeDoc(d => {
-              // Use Automerge's updateText for efficient multiplayer edits
-              // (as opposed to replacing the whole title on each edit)
-              updateText(d.tasks[index], ['title'], e.target.value)
-            })}
-            style={done ? {textDecoration: 'line-through'}: {}}
-          />
-        </div>)
-      }
-
+        {/* Shareable Link */}
+        {docUrl && (
+          <div style={{ marginTop: '20px' }}>
+            <button
+              onClick={() => {
+                const link = `${window.location.origin}/#${docUrl}`;
+                navigator.clipboard.writeText(link);
+                alert(`Link copied: ${link}`);
+              }}
+              style={{
+                padding: '10px 20px',
+                backgroundColor: '#4CAF50',
+                color: 'white',
+                border: 'none',
+                borderRadius: '5px',
+                cursor: 'pointer',
+                marginTop: '10px',
+              }}
+            >
+              📎 Copy Shareable Link
+            </button>
+          </div>
+        )}
       </div>
-
-
-
-      <footer>
-        <p className="read-the-docs">Powered by Automerge + Vite + React + TypeScript
-        </p>
-      </footer>
-    </>
-  )
-}
-
-export default App
+    </RepoContext.Provider>
+  );
+};
