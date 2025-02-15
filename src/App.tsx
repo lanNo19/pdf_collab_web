@@ -2,12 +2,10 @@ import React, { useEffect, useState } from 'react';
 import { Repo } from '@automerge/automerge-repo';
 import { BroadcastChannelNetworkAdapter } from '@automerge/automerge-repo-network-broadcastchannel';
 import { RepoContext } from '@automerge/automerge-repo-react-hooks';
-import { Viewer } from '@react-pdf-viewer/core';
-import '@react-pdf-viewer/core/lib/styles/index.css';
 
 type Document = {
   pdfName: string;
-  pdfData?: string; // Base64 string of the PDF
+  pdfData?: string; // Base64-encoded PDF
   ratings: number[];
 };
 
@@ -15,9 +13,10 @@ export const App = () => {
   const [repo, setRepo] = useState<Repo | null>(null);
   const [docUrl, setDocUrl] = useState<string | null>(null);
   const [documents, setDocuments] = useState<string[]>([]);
-  const [pdfFile, setPdfFile] = useState<File | null>(null);
   const [pdfUrl, setPdfUrl] = useState<string | null>(null);
+  const [pdfFile, setPdfFile] = useState<File | null>(null);
 
+  // Initialize Automerge Repo
   useEffect(() => {
     const newRepo = new Repo({
       network: [new BroadcastChannelNetworkAdapter()],
@@ -25,6 +24,7 @@ export const App = () => {
     setRepo(newRepo);
   }, []);
 
+  // Handle PDF file selection
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file && file.type === 'application/pdf') {
@@ -36,15 +36,15 @@ export const App = () => {
     }
   };
 
+  // Create a new document with the uploaded PDF
   const createDocument = async () => {
     if (!repo || !pdfFile) {
       alert('Please select a PDF file first!');
       return;
     }
 
-    // Convert PDF to Base64
+    // Convert PDF file to Base64
     const reader = new FileReader();
-    reader.readAsDataURL(pdfFile);
     reader.onload = () => {
       const pdfBase64 = reader.result as string;
       const handle = repo.create<Document>({
@@ -55,6 +55,7 @@ export const App = () => {
       setDocUrl(handle.url);
       setDocuments((prev) => [...prev, handle.url]);
     };
+    reader.readAsDataURL(pdfFile);
   };
 
   return (
@@ -86,10 +87,10 @@ export const App = () => {
           />
           {pdfUrl && (
             <div style={{ margin: '20px 0' }}>
-              <h3>Preview:</h3>
-              <div style={{ height: '400px', border: '1px solid #000' }}>
-                <Viewer fileUrl={pdfUrl} />
-              </div>
+              <h3>PDF Preview:</h3>
+              <object data={pdfUrl} type="application/pdf" width="100%" height="500px">
+                <p>PDF preview not available. Please check the file.</p>
+              </object>
             </div>
           )}
           <button
