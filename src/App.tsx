@@ -67,9 +67,9 @@ export const App = ({ initialDocUrl }: { initialDocUrl: string | null }) => {
   };
 
   if (initialDocUrl) {
-    window.location.href = `/#${initialDocUrl}`;
-    return null;
+    return <DocumentView docUrl={initialDocUrl} />;
   }
+  
 
   return (
     <RepoContext.Provider value={repo}>
