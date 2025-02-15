@@ -10,7 +10,8 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<App initialDocUrl={null} />} />
-        <Route path="/document/:docId" element={<DocumentView docUrl={window.location.hash.slice(1)} />} />
+        <Route path="/document/:docId" element={<DocumentView />} />
+
       </Routes>
     </BrowserRouter>
   </React.StrictMode>
