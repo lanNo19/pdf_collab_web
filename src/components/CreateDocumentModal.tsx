@@ -8,20 +8,29 @@ interface Props {
 export const CreateDocumentModal: React.FC<Props> = ({ onClose, onCreate }) => {
   const [pdfFile, setPdfFile] = useState<File | null>(null);
   const [pdfUrl, setPdfUrl] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
+  // Handle PDF file selection
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    if (file && file.type === 'application/pdf') {
-      const url = URL.createObjectURL(file);
-      setPdfUrl(url);
-    } else {
-      alert('❌ Please upload a valid PDF file!');
+    if (file) {
+      if (file.type === 'application/pdf') {
+        setPdfFile(file);
+        const url = URL.createObjectURL(file);
+        setPdfUrl(url);
+        setError(null); // Clear error if previously set
+      } else {
+        setPdfFile(null);
+        setPdfUrl(null);
+        setError('❌ Please select a valid PDF file.');
+      }
     }
   };
 
+  // Create document and pass it to parent
   const handleCreateDocument = () => {
     if (!pdfFile || !pdfUrl) {
-      alert('⚠️ Select a PDF file first!');
+      setError('⚠️ Please select a PDF file before creating a document.');
       return;
     }
 
@@ -60,8 +69,9 @@ export const CreateDocumentModal: React.FC<Props> = ({ onClose, onCreate }) => {
           textAlign: 'center',
         }}
       >
-        <h3>📎 Upload PDF Document</h3>
+        <h3>📎 Upload a PDF Document</h3>
 
+        {/* PDF Upload Input */}
         <input
           type="file"
           accept="application/pdf"
@@ -69,6 +79,10 @@ export const CreateDocumentModal: React.FC<Props> = ({ onClose, onCreate }) => {
           style={{ margin: '10px 0' }}
         />
 
+        {/* Error Message */}
+        {error && <p style={{ color: 'red', marginTop: '10px' }}>{error}</p>}
+
+        {/* PDF Preview */}
         {pdfUrl && (
           <div style={{ margin: '20px 0' }}>
             <h4>🔍 PDF Preview:</h4>
@@ -78,6 +92,7 @@ export const CreateDocumentModal: React.FC<Props> = ({ onClose, onCreate }) => {
           </div>
         )}
 
+        {/* Modal Actions */}
         <div style={{ marginTop: '20px', display: 'flex', justifyContent: 'center', gap: '10px' }}>
           <button
             onClick={handleCreateDocument}
