@@ -3,6 +3,7 @@ import { useParams } from 'react-router-dom';
 import { useDocument } from '@automerge/automerge-repo-react-hooks';
 import { PDFViewer } from '../components/PDFViewer';
 import { AutomergeUrl } from '@automerge/automerge-repo';
+import { TopBar } from '../components/TopBar';
 
 // Document interface
 interface Document {
@@ -35,60 +36,86 @@ export const DocumentView: React.FC = () => {
   }
 
   return (
-    <div style={{ height: '100vh', width: '100vw', display: 'flex' }}>
-      {/* PDF Viewer */}
-      <div style={{ flex: 4, height: '100%' }}>
-        <PDFViewer pdfUrl={doc.pdfUrl} />
+    <div style={{ height: '100vh', width: '100vw', display: 'flex', flexDirection: 'column' }}>
+      {/* Top Bar */}
+      <div style={{ height: '60px', backgroundColor: '#007BFF', color: 'white', display: 'flex', alignItems: 'center', padding: '0 20px' }}>
+        <button
+          style={{
+            marginRight: '20px',
+            backgroundColor: 'white',
+            color: '#007BFF',
+            border: 'none',
+            borderRadius: '5px',
+            padding: '6px 12px',
+            cursor: 'pointer',
+            fontWeight: 'bold',
+          }}
+          onClick={() => (window.location.href = '/automerge-repo-quickstart')}
+        >
+          ⬅️ Back
+        </button>
+        <span>📄 {doc.pdfName}</span>
+        <div style={{ marginLeft: 'auto', fontSize: '14px' }}>
+          🔗 Share Link: {window.location.href}
+        </div>
       </div>
 
-      {/* Rating Panel */}
-      <div
-        style={{
-          flex: 1,
-          backgroundColor: '#f5f5f5',
-          borderLeft: '3px solid #ccc',
-          padding: '20px',
-          boxSizing: 'border-box',
-          overflowY: 'auto',
-        }}
-      >
-        <h3>📊 Average Ratings</h3>
-        {doc.ratings.map((score, index) => (
-          <div key={index} style={{ marginBottom: '10px' }}>
-            <strong>Quality {index + 1}:</strong> {score.toFixed(2)}
-          </div>
-        ))}
-        {!isOwner && (
-          <div>
-            <h4>Rate Qualities:</h4>
-            {doc.ratings.map((_, index) => (
-              <div key={index} style={{ marginBottom: '5px' }}>
-                <label>Quality {index + 1}: </label>
-                {[1, 2, 3, 4].map((score) => (
-                  <button
-                    key={score}
-                    style={{
-                      margin: '0 5px',
-                      padding: '5px 10px',
-                      borderRadius: '5px',
-                      border: '1px solid #007BFF',
-                      background: '#007BFF',
-                      color: 'white',
-                      cursor: 'pointer',
-                    }}
-                    onClick={() => {
-                      changeDoc((draft) => {
-                        draft.ratings[index] = (draft.ratings[index] + score) / 2;
-                      });
-                    }}
-                  >
-                    {score}
-                  </button>
-                ))}
-              </div>
-            ))}
-          </div>
-        )}
+      {/* Main Content: PDF + Rating Panel */}
+      <div style={{ display: 'flex', flexGrow: 1 }}>
+        {/* PDF Viewer */}
+        <div style={{ flex: 4, height: '100%' }}>
+          <PDFViewer pdfUrl={doc.pdfUrl} />
+        </div>
+
+        {/* Rating Panel */}
+        <div
+          style={{
+            flex: 1,
+            backgroundColor: '#f5f5f5',
+            borderLeft: '3px solid #ccc',
+            padding: '20px',
+            boxSizing: 'border-box',
+            overflowY: 'auto',
+          }}
+        >
+          <h3>📊 Average Ratings</h3>
+          {doc.ratings.map((score, index) => (
+            <div key={index} style={{ marginBottom: '10px' }}>
+              <strong>Quality {index + 1}:</strong> {score.toFixed(2)}
+            </div>
+          ))}
+          {!isOwner && (
+            <div>
+              <h4>Rate Qualities:</h4>
+              {doc.ratings.map((_, index) => (
+                <div key={index} style={{ marginBottom: '5px' }}>
+                  <label>Quality {index + 1}: </label>
+                  {[1, 2, 3, 4].map((score) => (
+                    <button
+                      key={score}
+                      style={{
+                        margin: '0 5px',
+                        padding: '5px 10px',
+                        borderRadius: '5px',
+                        border: '1px solid #007BFF',
+                        background: '#007BFF',
+                        color: 'white',
+                        cursor: 'pointer',
+                      }}
+                      onClick={() => {
+                        changeDoc((draft) => {
+                          draft.ratings[index] = (draft.ratings[index] + score) / 2;
+                        });
+                      }}
+                    >
+                      {score}
+                    </button>
+                  ))}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
