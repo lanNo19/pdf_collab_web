@@ -7,7 +7,7 @@ import { DocumentView } from './views/DocumentView';
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
-    <BrowserRouter>
+    <BrowserRouter basename="/automerge-repo-quickstart">
       <Routes>
         <Route path="/" element={<App initialDocUrl={null} />} />
         <Route path="/document/:docId" element={<DocumentView />} />

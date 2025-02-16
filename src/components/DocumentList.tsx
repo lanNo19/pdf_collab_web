@@ -20,11 +20,8 @@ export const DocumentList: React.FC<Props> = ({ documents }) => {
         <ul>
         {documents.map((doc) => (
             <li key={doc.id} style={{ margin: '10px 0' }}>
-                <a
-                href={`/document/${doc.id}`}
-                style={{ textDecoration: 'underline', color: '#007BFF', cursor: 'pointer' }}
-                >
-                📄 {doc.pdfName}
+                <a href={`document/${doc.id}`} style={{ textDecoration: 'underline', color: '#007BFF', cursor: 'pointer' }}>
+                    📄 {doc.pdfName}
                 </a>
             </li>
         ))}
