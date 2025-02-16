@@ -2,8 +2,6 @@ import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { useDocument } from '@automerge/automerge-repo-react-hooks';
 import { PDFViewer } from '../components/PDFViewer';
-import { RatingPanel } from '../components/RatingPanel';
-import { TopBar } from '../components/TopBar';
 import { AutomergeUrl } from '@automerge/automerge-repo';
 
 // Document interface
@@ -31,68 +29,66 @@ export const DocumentView: React.FC = () => {
     }
   }, [doc, docId]);
 
-  // Handle rating changes
-  const handleRate = (index: number, score: number) => {
-    changeDoc((draft) => {
-      if (draft.ratings) {
-        draft.ratings[index] = (draft.ratings[index] + score) / 2;
-      }
-    });
-  };
-
   // Render loading state if document isn't ready
   if (!doc) {
     return <div>Loading document...</div>;
   }
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
-      {/* Top Bar */}
-      <TopBar documentUrl={doc.id} onBack={() => (window.location.href = '/automerge-repo-quickstart')} />
+    <div style={{ height: '100vh', width: '100vw', display: 'flex' }}>
+      {/* PDF Viewer */}
+      <div style={{ flex: 4, height: '100%' }}>
+        <PDFViewer pdfUrl={doc.pdfUrl} />
+      </div>
 
-      {/* Main Content: PDF + Rating Panel */}
-      <div style={{ display: 'flex', flexGrow: 1, width: '100%' }}>
-        {/* PDF Viewer */}
-        <div style={{ flex: '4 1 80%', height: '100%' }}>
-          <PDFViewer pdfUrl={doc.pdfUrl} />
-        </div>
-
-        {/* Rating Panel */}
-        <div style={{
-          flex: '1 1 20%',
-          height: '100%',
-          backgroundColor: '#f0f2f5',
-          borderLeft: '2px solid #ccc',
+      {/* Rating Panel */}
+      <div
+        style={{
+          flex: 1,
+          backgroundColor: '#f5f5f5',
+          borderLeft: '3px solid #ccc',
+          padding: '20px',
           boxSizing: 'border-box',
           overflowY: 'auto',
-          padding: '10px'
-        }}>
-          <h3>📊 Average Ratings</h3>
-          {doc.ratings.map((score, index) => (
-            <div key={index} style={{ marginBottom: '10px' }}>
-              <strong>Quality {index + 1}</strong>: {score.toFixed(2)}
-            </div>
-          ))}
-          {!isOwner && (
-            <div>
-              <h4>Rate Qualities:</h4>
-              {doc.ratings.map((_, index) => (
-                <div key={index} style={{ marginBottom: '5px' }}>
-                  <label>Quality {index + 1}: </label>
-                  {[1, 2, 3, 4].map((score) => (
-                    <button
-                      key={score}
-                      style={{ margin: '0 5px', padding: '3px 6px' }}
-                      onClick={() => handleRate(index, score)}
-                    >
-                      {score}
-                    </button>
-                  ))}
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
+        }}
+      >
+        <h3>📊 Average Ratings</h3>
+        {doc.ratings.map((score, index) => (
+          <div key={index} style={{ marginBottom: '10px' }}>
+            <strong>Quality {index + 1}:</strong> {score.toFixed(2)}
+          </div>
+        ))}
+        {!isOwner && (
+          <div>
+            <h4>Rate Qualities:</h4>
+            {doc.ratings.map((_, index) => (
+              <div key={index} style={{ marginBottom: '5px' }}>
+                <label>Quality {index + 1}: </label>
+                {[1, 2, 3, 4].map((score) => (
+                  <button
+                    key={score}
+                    style={{
+                      margin: '0 5px',
+                      padding: '5px 10px',
+                      borderRadius: '5px',
+                      border: '1px solid #007BFF',
+                      background: '#007BFF',
+                      color: 'white',
+                      cursor: 'pointer',
+                    }}
+                    onClick={() => {
+                      changeDoc((draft) => {
+                        draft.ratings[index] = (draft.ratings[index] + score) / 2;
+                      });
+                    }}
+                  >
+                    {score}
+                  </button>
+                ))}
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
