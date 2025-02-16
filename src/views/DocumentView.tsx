@@ -16,7 +16,7 @@ interface Document {
 
 export const DocumentView: React.FC = () => {
   const { docId } = useParams<{ docId: string }>();
-  const [doc, changeDoc] = useDocument<Document>(`automerge:${docId}` as AutomergeUrl);
+  const [doc, changeDoc] = useDocument<Document>(docId as AutomergeUrl);
   const [isOwner, setIsOwner] = useState<boolean>(false);
 
   // Debugging

@@ -1,33 +1,41 @@
 import React from 'react';
 
-type Document = {
+// Define the Document interface
+interface Document {
   id: string;
   pdfName: string;
-  pdfUrl?: string;
-};
+  pdfUrl: string;
+  ratings: number[];
+}
 
-interface Props {
+interface DocumentListProps {
   documents: Document[];
 }
 
-export const DocumentList: React.FC<Props> = ({ documents }) => {
+export const DocumentList: React.FC<DocumentListProps> = ({ documents }) => {
   return (
     <div style={{ marginTop: '20px' }}>
-      <h2>Your Documents</h2>
-      {documents.length === 0 ? (
-        <p>No documents available. Create one to get started!</p>
-      ) : (
-        <ul>
-        {documents.map((doc) => (
+      <h2>📑 Your Documents</h2>
+      <ul style={{ listStyleType: 'none', padding: 0 }}>
+        {documents.length === 0 ? (
+          <li>No documents found.</li>
+        ) : (
+          documents.map((doc) => (
             <li key={doc.id} style={{ margin: '10px 0' }}>
-                <a href={`document/${doc.id}`} style={{ textDecoration: 'underline', color: '#007BFF', cursor: 'pointer' }}>
-                    📄 {doc.pdfName}
-                </a>
+              <a
+                href={`/automerge-repo-quickstart/document/${doc.id.replace('automerge:', '')}`}
+                style={{
+                  textDecoration: 'underline',
+                  color: '#007BFF',
+                  cursor: 'pointer',
+                }}
+              >
+                📄 {doc.pdfName}
+              </a>
             </li>
-        ))}
-        </ul>
-
-      )}
+          ))
+        )}
+      </ul>
     </div>
   );
 };
