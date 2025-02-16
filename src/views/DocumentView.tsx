@@ -48,15 +48,51 @@ export const DocumentView: React.FC = () => {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
       {/* Top Bar */}
-      <TopBar documentUrl={doc.id} onBack={() => (window.location.href = '/')} />
-      
+      <TopBar documentUrl={doc.id} onBack={() => (window.location.href = '/automerge-repo-quickstart')} />
+
       {/* Main Content: PDF + Rating Panel */}
-      <div style={{ display: 'flex', flexGrow: 1 }}>
+      <div style={{ display: 'flex', flexGrow: 1, width: '100%' }}>
         {/* PDF Viewer */}
-        <PDFViewer pdfUrl={doc.pdfUrl} />
+        <div style={{ flex: '4 1 80%', height: '100%' }}>
+          <PDFViewer pdfUrl={doc.pdfUrl} />
+        </div>
 
         {/* Rating Panel */}
-        <RatingPanel ratings={doc.ratings} onRate={handleRate} isOwner={isOwner} />
+        <div style={{
+          flex: '1 1 20%',
+          height: '100%',
+          backgroundColor: '#f0f2f5',
+          borderLeft: '2px solid #ccc',
+          boxSizing: 'border-box',
+          overflowY: 'auto',
+          padding: '10px'
+        }}>
+          <h3>📊 Average Ratings</h3>
+          {doc.ratings.map((score, index) => (
+            <div key={index} style={{ marginBottom: '10px' }}>
+              <strong>Quality {index + 1}</strong>: {score.toFixed(2)}
+            </div>
+          ))}
+          {!isOwner && (
+            <div>
+              <h4>Rate Qualities:</h4>
+              {doc.ratings.map((_, index) => (
+                <div key={index} style={{ marginBottom: '5px' }}>
+                  <label>Quality {index + 1}: </label>
+                  {[1, 2, 3, 4].map((score) => (
+                    <button
+                      key={score}
+                      style={{ margin: '0 5px', padding: '3px 6px' }}
+                      onClick={() => handleRate(index, score)}
+                    >
+                      {score}
+                    </button>
+                  ))}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

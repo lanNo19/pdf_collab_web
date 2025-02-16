@@ -1,6 +1,5 @@
 import React from 'react';
 
-// Define missing interface
 interface PDFViewerProps {
   pdfUrl: string;
 }
@@ -14,7 +13,7 @@ export const PDFViewer: React.FC<PDFViewerProps> = ({ pdfUrl }) => {
   }
 
   return (
-    <div style={{ width: '80%', height: 'calc(100vh - 50px)', overflow: 'auto' }}>
+    <div style={{ width: '100%', height: '100%', overflow: 'hidden' }}>
       <object data={pdfUrl} type="application/pdf" width="100%" height="100%">
         <p>⚠️ PDF preview not available.</p>
       </object>
