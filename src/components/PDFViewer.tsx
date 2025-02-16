@@ -20,7 +20,7 @@ export const PDFViewer: React.FC<PDFViewerProps> = ({ pdfUrl }) => {
   return (
     <div style={{ width: '100%', height: '100%' }}>
       {/* Hardcoded PDF.js worker URL */}
-      <Worker workerUrl={`https://unpkg.com/pdfjs-dist@3.4.120/build/pdf.worker.min.js`}>
+      <Worker workerUrl={`https://unpkg.com/pdfjs-dist@4.10.38/build/pdf.worker.min.js`}>
         <Viewer fileUrl={pdfUrl} plugins={[defaultLayoutPluginInstance]} />
       </Worker>
     </div>
